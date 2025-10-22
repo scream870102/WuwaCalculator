@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>鳴潮資源計算器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft JhengHei', 'Segoe UI', sans-serif;
+            background: #0a0e27;
+            min-height: 100vh;
+            padding: 20px;
+            color: #e0e0e0;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: #151929;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        h1 {
+            text-align: center;
+            color: #00d4ff;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+
+        .header-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 30px;
+            background: #1a1f35;
+            border-radius: 8px;
+            padding: 4px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #8b92b0;
+            transition: all 0.3s;
+            border-radius: 6px;
+        }
+
+        .tab.active {
+            background: #00d4ff;
+            color: #0a0e27;
+            font-weight: 600;
+        }
+
+        .tab:hover:not(.active) {
+            background: #252b45;
+            color: #fff;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #b0b7c3;
+            font-weight: 500;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        select, input[type="number"], input[type="text"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #2a3150;
+            border-radius: 6px;
+            font-size: 16px;
+            background: #1a1f35;
+            color: #e0e0e0;
+            transition: all 0.3s;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: #00d4ff;
+            background: #252b45;
+        }
+
+        .level-selector {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .arrow {
+            font-size: 24px;
+            color: #00d4ff;
+        }
+
+        button {
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+            color: #0a0e27;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 212, 255, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #2a3150;
+            color: #e0e0e0;
+        }
+
+        .btn-secondary:hover {
+            background: #353d5c;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff4757 0%, #cc3333 100%);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            box-shadow: 0 8px 20px rgba(255, 71, 87, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+        }
+
+        .character-info {
+            background: #1a1f35;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border-left: 3px solid #00d4ff;
+        }
+
+        .attribute-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 8px;
+            text-transform: uppercase;
+        }
+
+        .attr-fusion { background: #ff6b6b; color: white; }
+        .attr-aero { background: #4ecdc4; color: white; }
+        .attr-electro { background: #9b59b6; color: white; }
+        .attr-glacio { background: #3498db; color: white; }
+        .attr-spectro { background: #f1c40f; color: #0a0e27; }
+        .attr-havoc { background: #e74c3c; color: white; }
+
+        .plan-list {
+            margin-top: 20px;
+        }
+
+        .plan-item {
+            background: #1a1f35;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border-left: 3px solid #00d4ff;
+            position: relative;
+        }
+
+        .plan-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .plan-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #00d4ff;
+        }
+
+        .plan-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .plan-actions button {
+            padding: 6px 12px;
+            font-size: 14px;
+        }
+
+        .plan-details {
+            color: #b0b7c3;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        .results {
+            margin-top: 30px;
+            padding: 20px;
+            background: #1a1f35;
+            border-radius: 6px;
+        }
+
+        .material-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #252b45;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+
+        .material-item:hover {
+            background: #2d3451;
+            transform: translateX(5px);
+        }
+
+        .material-name {
+            font-weight: 600;
+            color: #e0e0e0;
+            flex: 1;
+        }
+
+        .material-count {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .needed {
+            color: #ff6b6b;
+            font-weight: 600;
+        }
+
+        .owned {
+            color: #2ecc71;
+            font-weight: 600;
+        }
+
+        .shortage {
+            color: #ff4757;
+            background: rgba(255, 71, 87, 0.2);
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .surplus {
+            color: #2ecc71;
+            background: rgba(46, 204, 113, 0.2);
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .inventory-item {
+            background: #1a1f35;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #2a3150;
+            transition: all 0.3s;
+        }
+
+        .inventory-item:hover {
+            border-color: #00d4ff;
+            background: #252b45;
+        }
+
+        .inventory-item label {
+            color: #b0b7c3;
+            font-size: 13px;
+        }
+
+        .inventory-item input {
+            margin-top: 8px;
+        }
+
+        .synthesis-info {
+            background: rgba(0, 212, 255, 0.1);
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #00d4ff;
+            border-left: 3px solid #00d4ff;
+        }
+
+        .section-title {
+            font-size: 1.3em;
+            color: #00d4ff;
+            margin: 30px 0 15px 0;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .info-text {
+            color: #b0b7c3;
+            font-size: 14px;
+            margin-top: 10px;
+            padding: 15px;
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 6px;
+            border-left: 3px solid #00d4ff;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #8b92b0;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #00d4ff;
+        }
+
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #151929;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 1.5em;
+            color: #00d4ff;
+            font-weight: 600;
+        }
+
+        .close-modal {
+            background: none;
+            color: #8b92b0;
+            font-size: 28px;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+        }
+
+        .close-modal:hover {
+            background: #2a3150;
+            color: #fff;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+            
+            .inventory-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .material-count {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚔️ 鳴潮資源計算器</h1>
+        
+        <div class="header-actions">
+            <button onclick="refreshData()" class="btn-success">🔄 更新角色資料</button>
+            <button onclick="exportData()" class="btn-secondary">📥 匯出資料</button>
+            <button onclick="importData()" class="btn-secondary">📤 匯入資料</button>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('planner')">📋 升級計劃</button>
+            <button class="tab" onclick="switchTab('summary')">📊 總覽</button>
+            <button class="tab" onclick="switchTab('inventory')">🎒 材料庫存</button>
+            <button class="tab" onclick="switchTab('about')">ℹ️ 關於</button>
+        </div>
+
+        <!-- 升級計劃標籤 -->
+        <div id="planner" class="tab-content active">
+            <div class="grid-2">
+                <div>
+                    <h3 class="section-title">角色技能升級</h3>
+                    <div class="input-group">
+                        <label>選擇角色</label>
+                        <select id="characterSelect">
+                            <option value="">請選擇角色</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label>技能類型</label>
+                        <select id="skillType">
+                            <option value="normal">普通攻擊</option>
+                            <option value="skill">共鳴技能</option>
+                            <option value="liberation">共鳴解放</option>
+                            <option value="intro">變奏技能</option>
+                            <option value="forte">延奏技能</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label>技能等級</label>
+                        <div class="level-selector">
+                            <select id="currentSkillLevel"></select>
+                            <span class="arrow">→</span>
+                            <select id="targetSkillLevel"></select>
+                        </div>
+                    </div>
+
+                    <button onclick="addSkillPlan()">➕ 加入計劃</button>
+                </div>
+
+                <div>
+                    <h3 class="section-title">武器升級</h3>
+                    <div class="input-group">
+                        <label>武器名稱（選填）</label>
+                        <input type="text" id="weaponName" placeholder="例如：時和歲稔">
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="input-group">
+                            <label>武器稀有度</label>
+                            <select id="weaponRarity">
+                                <option value="3">3星</option>
+                                <option value="4">4星</option>
+                                <option value="5">5星</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group">
+                            <label>武器類型</label>
+                            <select id="weaponType">
+                                <option value="sword">長劍</option>
+                                <option value="broadblade">闊刀</option>
+                                <option value="pistols">音感儀</option>
+                                <option value="gauntlets">臂鎧</option>
+                                <option value="rectifier">矩陣</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>武器等級</label>
+                        <div class="level-selector">
+                            <select id="currentWeaponLevel"></select>
+                            <span class="arrow">→</span>
+                            <select id="targetWeaponLevel"></select>
+                        </div>
+                    </div>
+
+                    <button onclick="addWeaponPlan()">➕ 加入計劃</button>
+                </div>
+            </div>
+
+            <div class="section-title">當前計劃列表</div>
+            <div id="planList" class="plan-list"></div>
+        </div>
+
+        <!-- 總覽標籤 -->
+        <div id="summary" class="tab-content">
+            <div class="action-buttons">
+                <button onclick="calculateTotal()">🧮 計算總需求</button>
+                <button onclick="clearAllPlans()" class="btn-danger">🗑️ 清空所有計劃</button>
+            </div>
+            
+            <div id="totalResults" class="results" style="display:none;"></div>
+        </div>
+
+        <!-- 材料庫存標籤 -->
+        <div id="inventory" class="tab-content">
+            <div class="action-buttons">
+                <button onclick="saveInventory()" class="btn-success">💾 保存庫存</button>
+                <button onclick="clearInventory()" class="btn-danger">🗑️ 清空庫存</button>
+            </div>
+            
+            <p class="info-text">💡 提示：在這裡輸入你擁有的材料數量，計算時會自動對比並顯示缺少的材料以及合成建議</p>
+            
+            <h3 class="section-title">技能材料</h3>
+            <div class="inventory-grid" id="skillInventoryGrid"></div>
+            
+            <h3 class="section-title">武器材料</h3>
+            <div class="inventory-grid" id="weaponInventoryGrid"></div>
+            
+            <h3 class="section-title">通用材料</h3>
+            <div class="inventory-grid" id="commonInventoryGrid"></div>
+        </div>
+
+        <!-- 關於標籤 -->
+        <div id="about" class="tab-content">
+            <h2 class="section-title">關於本計算器</h2>
+            <p style="line-height: 1.8; color: #b0b7c3;">
+                本計算器是為鳴潮玩家設計的資源管理工具，幫助你計劃多個角色技能和武器的升級路線，並智能計算材料需求。
+            </p>
+            <br>
+            <h3 class="section-title">功能特色</h3>
+            <ul style="line-height: 2; color: #b0b7c3; margin-left: 20px;">
+                <li>✅ 支援多角色、多武器同時規劃</li>
+                <li>✅ 智能合成建議，自動計算低級材料轉換</li>
+                <li>✅ 本地數據保存，不會丟失</li>
+                <li>✅ 自動更新最新角色資料</li>
+                <li>✅ 深色扁平化設計，護眼舒適</li>
+            </ul>
+            <br>
+            <h3 class="section-title">使用說明</h3>
+            <ol style="line-height: 2; color: #b0b7c3; margin-left: 20px;">
+                <li>先在「材料庫存」頁面輸入你現有的材料數量並保存</li>
+                <li>在「升級計劃」頁面添加要升級的角色技能或武器</li>
+                <li>切換到「總覽」頁面，點擊計算總需求</li>
+                <li>系統會顯示所有材料需求、缺口和合成建議</li>
+            </ol>
+            <br>
+            <p class="info-text">
+                <strong>📌 注意：</strong>角色資料會定期更新，點擊「更新角色資料」按鈕可獲取最新資訊。材料計算僅供參考，實際需求以遊戲內為準。
+            </p>
+        </div>
+    </div>
+
+    <!-- 匯入資料Modal -->
+    <div id="importModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">匯入資料</h3>
+                <button class="close-modal" onclick="closeImportModal()">×</button>
+            </div>
+            <div class="input-group">
+                <label>貼上匯出的JSON資料</label>
+                <textarea id="importData" rows="10" style="width: 100%; padding: 12px; background: #1a1f35; border: 1px solid #2a3150; border-radius: 6px; color: #e0e0e0; font-family: monospace;"></textarea>
+            </div>
+            <div class="action-buttons">
+                <button onclick="confirmImport()" class="btn-success">確認匯入</button>
+                <button onclick="closeImportModal()" class="btn-secondary">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 角色數據庫
+        let characters = {
+            jiyan: { name: '忌炎', attr: '熱熔', weapon: '闊刀', rarity: 5 },
+            encore: { name: '安可', attr: '熱熔', weapon: '矩陣', rarity: 5 },
+            changli: { name: '長離', attr: '熱熔', weapon: '長劍', rarity: 5 },
+            jianxin: { name: '鑒心', attr: '氣動', weapon: '臂鎧', rarity: 5 },
+            calcharo: { name: '卡卡羅', attr: '導電', weapon: '闊刀', rarity: 5 },
+            yinlin: { name: '吟霖', attr: '導電', weapon: '矩陣', rarity: 5 },
+            xiangliyao: { name: '相里要', attr: '導電', weapon: '臂鎧', rarity: 5 },
+            zhezhi: { name: '折枝', attr: '冷凝', weapon: '矩陣', rarity: 5 },
+            lingyang: { name: '凌陽', attr: '冷凝', weapon: '臂鎧', rarity: 5 },
+            verina: { name: '維里奈', attr: '衍射', weapon: '矩陣', rarity: 5 },
+            shorekeeper: { name: '守岸人', attr: '衍射', weapon: '矩陣', rarity: 5 },
+            jinxi: { name: '今汐', attr: '衍射', weapon: '長劍', rarity: 5 },
+            'havoc-rover': { name: '漂泊者·湮滅', attr: '湮滅', weapon: '長劍', rarity: 5 },
+            camellya: { name: '卡梅莉雅', attr: '湮滅', weapon: '長劍', rarity: 5 },
+            yangyang: { name: '秧秧', attr: '氣動', weapon: '長劍', rarity: 4 },
+            baizhi: { name: '白芷', attr: '冷凝', weapon: '矩陣', rarity: 4 },
+            chixia: { name: '熾霞', attr: '熱熔', weapon: '音感儀', rarity: 4 },
+            yuanwu: { name: '淵武', attr: '導電', weapon: '臂鎧', rarity: 4 },
+            danjin: { name: '丹瑾', attr: '湮滅', weapon: '長劍', rarity: 4 },
+            aalto: { name: '秋水', attr: '氣動', weapon: '音感儀', rarity: 4 },
+            mortefi: { name: '莫特斐', attr: '熱熔', weapon: '音感儀', rarity: 4 },
+            taoqi: { name: '桃祈', attr: '湮滅', weapon: '闊刀', rarity: 4 },
+            sanhua: { name: '散華', attr: '冷凝', weapon: '長劍', rarity: 4 }
+        };
+
+        // 材料數據庫
+        const materials = {
+            skill: {
+                forgery: { name: '鍛鑄', tier: 1, type: 'skill' },
+                wavewornResidue: { name: '浪痕殘骸', tier: 2, type: 'skill', synthesis: { forgery: 4 } },
+                undulatedPearl: { name: '迴旋明珠', tier: 3, type: 'skill', synthesis: { wavewornResidue: 4 } },
+                howlerCore: { name: '咆哮核心', tier: 4, type: 'skill', synthesis: { undulatedPearl: 4 } },
+                
+                basicTacetCore: { name: '基礎音骸核', tier: 1, type: 'monster' },
+                mediumTacetCore: { name: '中級音骸核', tier: 2, type: 'monster', synthesis: { basicTacetCore: 4 } },
+                advancedTacetCore: { name: '高級音骸核', tier: 3, type: 'monster', synthesis: { mediumTacetCore: 4 } },
+                premiumTacetCore: { name: '頂級音骸核', tier: 4, type: 'monster', synthesis: { advancedTacetCore: 4 } },
+                
+                bellBorneGeochelone: { name: '鈴殼龜材料', type: 'boss' },
+                impermanenceHeron: { name: '無常鳶材料', type: 'boss' },
+                lampylumen: { name: '輝螢材料', type: 'boss' },
+                
+                thunderingMephis: { name: '雷鳴梅菲斯', type: 'weekly' },
+                feilian: { name: '飛廉', type: 'weekly' },
+                crownless: { name: '無冠者', type: 'weekly' },
+                jue: { name: '角', type: 'weekly' }
+            },
+            weapon: {
+                basicFeedstock: { name: '基礎武備', tier: 1, type: 'exp' },
+                mediumFeedstock: { name: '中級武備', tier: 2, type: 'exp' },
+                advancedFeedstock: { name: '高級武備', tier: 3, type: 'exp' },
+                premiumFeedstock: { name: '頂級武備', tier: 4, type: 'exp' },
+                
+                inertMetallicDrip: { name: '惰性金屬滴', tier: 1, type: 'ascension' },
+                reactiveMetallicDrip: { name: '反應金屬滴', tier: 2, type: 'ascension', synthesis: { inertMetallicDrip: 4 } },
+                polarizedMetallicDrip: { name: '極化金屬滴', tier: 3, type: 'ascension', synthesis: { reactiveMetallicDrip: 4 } },
+                heterizedMetallicDrip: { name: '異構金屬滴', tier: 4, type: 'ascension', synthesis: { polarizedMetallicDrip: 4 } },
+                
+                extractedPhlogiston: { name: '提取燃素', tier: 1, type: 'monster' },
+                refinedPhlogiston: { name: '精煉燃素', tier: 2, type: 'monster', synthesis: { extractedPhlogiston: 4 } },
+                flawlessPhlogiston: { name: '無瑕燃素', tier: 3, type: 'monster', synthesis: { refinedPhlogiston: 4 } }
+            },
+            common: {
+                shellCredit: { name: '貝幣', type: 'currency' }
+            }
+        };
+
+        // 技能升級材料需求表
+        const skillMaterialRequirements = {
+            1: { forgery: 2500, basicTacetCore: 2 },
+            2: { forgery: 5000, basicTacetCore: 3 },
+            3: { forgery: 7500, mediumTacetCore: 2, bellBorneGeochelone: 1 },
+            4: { forgery: 10000, mediumTacetCore: 3, bellBorneGeochelone: 1 },
+            5: { forgery: 15000, advancedTacetCore: 2, bellBorneGeochelone: 1 },
+            6: { forgery: 20000, advancedTacetCore: 3, bellBorneGeochelone: 1, thunderingMephis: 1 },
+            7: { forgery: 30000, premiumTacetCore: 2, bellBorneGeochelone: 1, thunderingMephis: 1 },
+            8: { forgery: 40000, premiumTacetCore: 3, bellBorneGeochelone: 1, thunderingMephis: 1 },
+            9: { forgery: 50000, premiumTacetCore: 4, bellBorneGeochelone: 1, thunderingMephis: 1 }
+        };
+
+        // 升級計劃列表
+        let upgradePlans = [];
+        
+        // 本地存儲
+        let inventory = {};
+
+        // 初始化
+        function init() {
+            loadInventory();
+            loadPlans();
+            renderInventoryGrids();
+            populateCharacterSelect();
+            populateLevelSelects();
+            renderPlanList();
+        }
+
+        // 填充角色選擇器
+        function populateCharacterSelect() {
+            const select = document.getElementById('characterSelect');
+            select.innerHTML = '<option value="">請選擇角色</option>';
+            
+            const grouped = {
+                '5星角色 - 熱熔': [],
+                '5星角色 - 氣動': [],
+                '5星角色 - 導電': [],
+                '5星角色 - 冷凝': [],
+                '5星角色 - 衍射': [],
+                '5星角色 - 湮滅': [],
+                '4星角色': []
+            };
+
+            for (const [id, char] of Object.entries(characters)) {
+                if (char.rarity === 5) {
+                    const group = `5星角色 - ${char.attr}`;
+                    if (grouped[group]) {
+                        grouped[group].push({ id, char });
+                    }
+                } else {
+                    grouped['4星角色'].push({ id, char });
+                }
+            }
+
+            for (const [groupName, chars] of Object.entries(grouped)) {
+                if (chars.length > 0) {
+                    const optgroup = document.createElement('optgroup');
+                    optgroup.label = groupName;
+                    chars.forEach(({ id, char }) => {
+                        const option = document.createElement('option');
+                        option.value = id;
+                        option.textContent = char.name;
+                        optgroup.appendChild(option);
+                    });
+                    select.appendChild(optgroup);
+                }
+            }
+        }
+
+        // 填充等級選擇器
+        function populateLevelSelects() {
+            const skillLevels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+            const weaponLevels = [1, 20, 40, 50, 60, 70, 80, 90];
+
+            const currentSkill = document.getElementById('currentSkillLevel');
+            const targetSkill = document.getElementById('targetSkillLevel');
+            const currentWeapon = document.getElementById('currentWeaponLevel');
+            const targetWeapon = document.getElementById('targetWeaponLevel');
+
+            skillLevels.forEach(level => {
+                currentSkill.innerHTML += `<option value="${level}">Lv.${level}</option>`;
+                if (level > 1) {
+                    targetSkill.innerHTML += `<option value="${level}" ${level === 10 ? 'selected' : ''}>Lv.${level}</option>`;
+                }
+            });
+
+            weaponLevels.forEach(level => {
+                currentWeapon.innerHTML += `<option value="${level}">Lv.${level}</option>`;
+                if (level > 1) {
+                    targetWeapon.innerHTML += `<option value="${level}" ${level === 90 ? 'selected' : ''}>Lv.${level}</option>`;
+                }
+            });
+        }
+
+        // 切換標籤
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        // 添加技能升級計劃
+        function addSkillPlan() {
+            const charId = document.getElementById('characterSelect').value;
+            if (!charId) {
+                alert('請選擇角色');
+                return;
+            }
+
+            const char = characters[charId];
+            const skillType = document.getElementById('skillType');
+            const currentLevel = parseInt(document.getElementById('currentSkillLevel').value);
+            const targetLevel = parseInt(document.getElementById('targetSkillLevel').value);
+
+            if (targetLevel <= currentLevel) {
+                alert('目標等級必須大於當前等級');
+                return;
+            }
+
+            const plan = {
+                id: Date.now(),
+                type: 'skill',
+                charId,
+                charName: char.name,
+                skillType: skillType.options[skillType.selectedIndex].text,
+                currentLevel,
+                targetLevel,
+                materials: calculateSkillMaterials(currentLevel, targetLevel)
+            };
+
+            upgradePlans.push(plan);
+            savePlans();
+            renderPlanList();
+            
+            // 切換到總覽
+            document.querySelector('.tab:nth-child(2)').click();
+        }
+
+        // 添加武器升級計劃
+        function addWeaponPlan() {
+            const weaponName = document.getElementById('weaponName').value || '未命名武器';
+            const rarity = parseInt(document.getElementById('weaponRarity').value);
+            const weaponType = document.getElementById('weaponType');
+            const currentLevel = parseInt(document.getElementById('currentWeaponLevel').value);
+            const targetLevel = parseInt(document.getElementById('targetWeaponLevel').value);
+
+            if (targetLevel <= currentLevel) {
+                alert('目標等級必須大於當前等級');
+                return;
+            }
+
+            const plan = {
+                id: Date.now(),
+                type: 'weapon',
+                weaponName,
+                rarity,
+                weaponType: weaponType.options[weaponType.selectedIndex].text,
+                currentLevel,
+                targetLevel,
+                materials: calculateWeaponMaterials(rarity, currentLevel, targetLevel)
+            };
+
+            upgradePlans.push(plan);
+            savePlans();
+            renderPlanList();
+            
+            // 切換到總覽
+            document.querySelector('.tab:nth-child(2)').click();
+        }
+
+        // 計算技能材料
+        function calculateSkillMaterials(currentLevel, targetLevel) {
+            const needed = {};
+
+            for (let i = currentLevel; i < targetLevel; i++) {
+                const requirements = skillMaterialRequirements[i];
+                if (requirements) {
+                    for (const [material, amount] of Object.entries(requirements)) {
+                        needed[material] = (needed[material] || 0) + amount;
+                    }
+                }
+            }
+
+            return needed;
+        }
+
+        // 計算武器材料
+        function calculateWeaponMaterials(rarity, currentLevel, targetLevel) {
+            const needed = {};
+            
+            const expTable = {
+                3: { 20: 15000, 40: 45000, 50: 75000, 60: 120000, 70: 180000, 80: 250000, 90: 340000 },
+                4: { 20: 20000, 40: 60000, 50: 100000, 60: 160000, 70: 240000, 80: 330000, 90: 450000 },
+                5: { 20: 25000, 40: 75000, 50: 125000, 60: 200000, 70: 300000, 80: 410000, 90: 560000 }
+            };
+
+            let totalExp = 0;
+            const levels = [1, 20, 40, 50, 60, 70, 80, 90];
+            
+            for (let i = 0; i < levels.length - 1; i++) {
+                if (currentLevel < levels[i + 1] && targetLevel > levels[i]) {
+                    const levelKey = levels[i + 1];
+                    totalExp += expTable[rarity][levelKey] || 0;
+                }
+            }
+
+            needed.premiumFeedstock = Math.floor(totalExp / 10000);
+            totalExp %= 10000;
+            needed.advancedFeedstock = Math.floor(totalExp / 5000);
+            totalExp %= 5000;
+            needed.mediumFeedstock = Math.floor(totalExp / 2500);
+            totalExp %= 2500;
+            needed.basicFeedstock = Math.ceil(totalExp / 1000);
+
+            const breakthroughLevels = [20, 40, 50, 60, 70, 80];
+            let breakthroughs = 0;
+            
+            for (const level of breakthroughLevels) {
+                if (currentLevel < level && targetLevel >= level) {
+                    breakthroughs++;
+                }
+            }
+
+            if (breakthroughs > 0) {
+                needed.inertMetallicDrip = breakthroughs * 4;
+                needed.reactiveMetallicDrip = breakthroughs * 3;
+                needed.polarizedMetallicDrip = breakthroughs * 2;
+                needed.heterizedMetallicDrip = breakthroughs * 1;
+                needed.extractedPhlogiston = breakthroughs * 8;
+                needed.refinedPhlogiston = breakthroughs * 6;
+                needed.flawlessPhlogiston = breakthroughs * 4;
+                needed.shellCredit = breakthroughs * 10000;
+            }
+
+            return needed;
+        }
+
+        // 渲染計劃列表
+        function renderPlanList() {
+            const listDiv = document.getElementById('planList');
+            
+            if (upgradePlans.length === 0) {
+                listDiv.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📋</div>
+                        <h3>尚未添加任何升級計劃</h3>
+                        <p>請在上方選擇角色技能或武器進行規劃</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            upgradePlans.forEach(plan => {
+                if (plan.type === 'skill') {
+                    const char = characters[plan.charId];
+                    html += `
+                        <div class="plan-item">
+                            <div class="plan-header">
+                                <div class="plan-title">
+                                    <span class="attribute-badge attr-${char.attr.toLowerCase()}">${char.attr}</span>
+                                    ${plan.charName} - ${plan.skillType}
+                                </div>
+                                <div class="plan-actions">
+                                    <button onclick="removePlan(${plan.id})" class="btn-danger">刪除</button>
+                                </div>
+                            </div>
+                            <div class="plan-details">
+                                等級：Lv.${plan.currentLevel} → Lv.${plan.targetLevel}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    html += `
+                        <div class="plan-item">
+                            <div class="plan-header">
+                                <div class="plan-title">
+                                    <span class="attribute-badge" style="background: #f39c12; color: white;">${plan.rarity}★</span>
+                                    ${plan.weaponName} (${plan.weaponType})
+                                </div>
+                                <div class="plan-actions">
+                                    <button onclick="removePlan(${plan.id})" class="btn-danger">刪除</button>
+                                </div>
+                            </div>
+                            <div class="plan-details">
+                                等級：Lv.${plan.currentLevel} → Lv.${plan.targetLevel}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            listDiv.innerHTML = html;
+        }
+
+        // 移除計劃
+        function removePlan(planId) {
+            if (confirm('確定要刪除此計劃嗎？')) {
+                upgradePlans = upgradePlans.filter(p => p.id !== planId);
+                savePlans();
+                renderPlanList();
+            }
+        }
+
+        // 清空所有計劃
+        function clearAllPlans() {
+            if (confirm('⚠️ 確定要清空所有升級計劃嗎？此操作無法復原！')) {
+                upgradePlans = [];
+                savePlans();
+                renderPlanList();
+                document.getElementById('totalResults').style.display = 'none';
+            }
+        }
+
+        // 計算總需求
+        function calculateTotal() {
+            if (upgradePlans.length === 0) {
+                alert('請先添加升級計劃');
+                return;
+            }
+
+            const totalNeeded = {};
+            
+            upgradePlans.forEach(plan => {
+                for (const [material, amount] of Object.entries(plan.materials)) {
+                    totalNeeded[material] = (totalNeeded[material] || 0) + amount;
+                }
+            });
+
+            displayTotalResults(totalNeeded);
+        }
+
+        // 顯示總需求結果
+        function displayTotalResults(needed) {
+            const resultsDiv = document.getElementById('totalResults');
+            const allMaterials = { ...materials.skill, ...materials.weapon, ...materials.common };
+            
+            let html = '<h3 class="section-title">📊 總材料需求</h3>';
+            html += `<p class="info-text">已規劃 ${upgradePlans.length} 個升級項目</p>`;
+
+            const groupedMaterials = {};
+            for (const [key, amount] of Object.entries(needed)) {
+                const material = allMaterials[key];
+                if (!material || amount === 0) continue;
+                
+                const type = material.type || 'other';
+                if (!groupedMaterials[type]) {
+                    groupedMaterials[type] = [];
+                }
+                groupedMaterials[type].push({ key, material, amount });
+            }
+
+            const typeNames = {
+                'skill': '🎯 技能材料',
+                'exp': '📈 經驗材料',
+                'ascension': '⬆️ 突破材料',
+                'monster': '👾 怪物掉落',
+                'boss': '👹 首領材料',
+                'weekly': '⏰ 週本材料',
+                'currency': '💰 貨幣'
+            };
+
+            for (const [type, items] of Object.entries(groupedMaterials)) {
+                html += `<div class="section-title">${typeNames[type] || '其他材料'}</div>`;
+                
+                for (const { key, material, amount } of items) {
+                    const owned = inventory[key] || 0;
+                    const shortage = amount - owned;
+                    
+                    html += `
+                        <div class="material-item">
+                            <span class="material-name">${material.name}</span>
+                            <div class="material-count">
+                                <span class="needed">需要: ${amount.toLocaleString()}</span>
+                                <span class="owned">擁有: ${owned.toLocaleString()}</span>
+                                ${shortage > 0 ? 
+                                    `<span class="shortage">缺少: ${shortage.toLocaleString()}</span>` : 
+                                    `<span class="surplus">多餘: ${Math.abs(shortage).toLocaleString()}</span>`
+                                }
+                            </div>
+                        </div>
+                    `;
+
+                    // 計算合成建議
+                    if (shortage > 0 && material.synthesis) {
+                        const synthesisSteps = [];
+                        for (const [sourceKey, ratio] of Object.entries(material.synthesis)) {
+                            const sourceMaterial = allMaterials[sourceKey];
+                            if (sourceMaterial) {
+                                const neededAmount = shortage * ratio;
+                                const sourceOwned = inventory[sourceKey] || 0;
+                                const sourceShortage = Math.max(0, neededAmount - sourceOwned);
+                                
+                                if (sourceShortage === 0) {
+                                    synthesisSteps.push(`✅ 可用 ${neededAmount} 個 ${sourceMaterial.name} 合成`);
+                                } else {
+                                    synthesisSteps.push(`⚠️ 需要 ${neededAmount} 個 ${sourceMaterial.name}（缺 ${sourceShortage} 個）`);
+                                }
+                            }
+                        }
+                        if (synthesisSteps.length > 0) {
+                            html += `<div class="synthesis-info">💡 合成建議: ${synthesisSteps.join(' | ')}</div>`;
+                        }
+                    }
+                }
+            }
+
+            resultsDiv.innerHTML = html;
+            resultsDiv.style.display = 'block';
+        }
+
+        // 渲染庫存網格
+        function renderInventoryGrids() {
+            renderInventoryGrid('skillInventoryGrid', materials.skill);
+            renderInventoryGrid('weaponInventoryGrid', materials.weapon);
+            renderInventoryGrid('commonInventoryGrid', materials.common);
+        }
+
+        function renderInventoryGrid(gridId, materialDB) {
+            const grid = document.getElementById(gridId);
+            let html = '';
+
+            for (const [key, material] of Object.entries(materialDB)) {
+                const value = inventory[key] || 0;
+                html += `
+                    <div class="inventory-item">
+                        <label>${material.name}</label>
+                        <input type="number" 
+                               min="0" 
+                               value="${value}" 
+                               onchange="updateInventory('${key}', this.value)"
+                               placeholder="0">
+                    </div>
+                `;
+            }
+
+            grid.innerHTML = html;
+        }
+
+        // 更新庫存
+        function updateInventory(key, value) {
+            inventory[key] = parseInt(value) || 0;
+        }
+
+        // 保存庫存
+        function saveInventory() {
+            localStorage.setItem('wuwa_inventory', JSON.stringify(inventory));
+            alert('✅ 庫存已保存！');
+        }
+
+        // 載入庫存
+        function loadInventory() {
+            const saved = localStorage.getItem('wuwa_inventory');
+            if (saved) {
+                try {
+                    inventory = JSON.parse(saved);
+                } catch (e) {
+                    console.error('載入庫存失敗', e);
+                    inventory = {};
+                }
+            }
+        }
+
+        // 清空庫存
+        function clearInventory() {
+            if (confirm('⚠️ 確定要清空所有庫存資料嗎？此操作無法復原！')) {
+                inventory = {};
+                localStorage.removeItem('wuwa_inventory');
+                renderInventoryGrids();
+                alert('✅ 庫存已清空！');
+            }
+        }
+
+        // 保存計劃
+        function savePlans() {
+            localStorage.setItem('wuwa_plans', JSON.stringify(upgradePlans));
+        }
+
+        // 載入計劃
+        function loadPlans() {
+            const saved = localStorage.getItem('wuwa_plans');
+            if (saved) {
+                try {
+                    upgradePlans = JSON.parse(saved);
+                } catch (e) {
+                    console.error('載入計劃失敗', e);
+                    upgradePlans = [];
+                }
+            }
+        }
+
+        // 更新角色資料
+        async function refreshData() {
+            const btn = event.target;
+            btn.disabled = true;
+            btn.innerHTML = '🔄 更新中...';
+            
+            try {
+                // 模擬API調用（實際上應該從API獲取）
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                // 這裡可以添加實際的API調用
+                // const response = await fetch('API_URL');
+                // const data = await response.json();
+                // characters = data.characters;
+                
+                populateCharacterSelect();
+                alert('✅ 角色資料已更新！');
+            } catch (error) {
+                alert('❌ 更新失敗：' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '🔄 更新角色資料';
+            }
+        }
+
+        // 匯出資料
+        function exportData() {
+            const data = {
+                version: '1.0',
+                inventory,
+                plans: upgradePlans,
+                exportTime: new Date().toISOString()
+            };
+            
+            const json = JSON.stringify(data, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `wuwa_data_${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // 匯入資料
+        function importData() {
+            document.getElementById('importModal').classList.add('active');
+        }
+
+        function closeImportModal() {
+            document.getElementById('importModal').classList.remove('active');
+            document.getElementById('importData').value = '';
+        }
+
+        function confirmImport() {
+            const jsonText = document.getElementById('importData').value.trim();
+            if (!jsonText) {
+                alert('請輸入資料');
+                return;
+            }
+
+            try {
+                const data = JSON.parse(jsonText);
+                
+                if (data.inventory) {
+                    inventory = data.inventory;
+                    localStorage.setItem('wuwa_inventory', JSON.stringify(inventory));
+                }
+                
+                if (data.plans) {
+                    upgradePlans = data.plans;
+                    localStorage.setItem('wuwa_plans', JSON.stringify(upgradePlans));
+                }
+                
+                renderInventoryGrids();
+                renderPlanList();
+                closeImportModal();
+                alert('✅ 資料匯入成功！');
+            } catch (error) {
+                alert('❌ 匯入失敗：資料格式錯誤');
+            }
+        }
+
+        // 頁面載入時初始化
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
